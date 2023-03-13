@@ -19,7 +19,7 @@ Then, when *app.py* is running, ping it with the following commands:
 ```bash
 $ curl http://127.0.0.1:5000/api
 $ curl -H "Content-Type: text/plain" -X POST -d@input.txt http://127.0.0.1:5000/api
-```bash
+```
 
 ### Part 2 - Flask webserver to access spacy NER
 
