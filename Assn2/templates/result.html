@@ -1,0 +1,16 @@
+<html>
+<head>
+<link rel="stylesheet" href="{{ url_for('static',filename='css/main.css') }}" />
+
+</head>
+<body>
+{{processed_text | safe}}
+</body>
+</html>
+
+<form method = "POST">
+  <p></p>
+  <input type="submit" name="btn" value="Show list of entities so far">
+  <input type="submit" name="btn" value="Redo NER">
+  <input type="submit" name="btn" value="Reset database">
+</form>
