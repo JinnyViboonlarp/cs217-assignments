@@ -21,10 +21,11 @@ Then you could interact with the browser at [http://127.0.0.1:5000](http://127.0
 Please run
 ```
 docker build -t assn2 .
-docker run -p 5000:5000 assn2
+docker run --rm -it -p 5000:5000 -v <your_path_to_Assn2_folder>:/app/ assn2
+```
+For example, your path to Assn2's folder may be "C:\Users\jinny\Desktop\Assn2" and your command would be
+```
+docker run --rm -it -p 5000:5000 -v C:\Users\jinny\Desktop\Assn2:/app/ assn2
 ```
 Then you could interact with the browser at [http://127.0.0.1:5000](http://127.0.0.1:5000).
-Please note that I have not yet been able to persist the database inside Docker
-(after many attempts with using volume or bind mounts). I am trying to get that fixed (and the github repo updated)
-before Passover break starts.
 
