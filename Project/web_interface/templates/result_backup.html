@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>NER Result</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+  </head>
+  <body>
+    <h1>NER Result</h1>
+    <p><strong>Input text:</strong> {{ text }}</p>
+    <div>{{ entities_markup | safe }}</div>
+    <br>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Entity</th>
+          <th>Type</th>
+          <th>Edit</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entity in entities %}
+          <tr>
+            <td>{{ entity[3] }}</td>
+            <td>{{ entity[2] }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('entities') }}">
+                <div class="form-group">
+                  <!input type="text" class="form-control" name="entity_text" value="{{ entity[2] }}">
+				  <!input type="text" class="form-control" id="Anna" name="Anna" value="{{ entity[2] }}">
+				  <!input type="text" class="form-control" id="{{ entity[3] }}" name="{{ entity[3] }}" value="{{ entity[2] }}">
+				  <input type="text" class="form-control" id="{{ entity[3] }}" name="{{ entity[3] }}" value="{{ entity[2] }}">
+                </div>
+                <button type="submit" class="btn btn-primary">Update</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <br>
+    <a href="{{ url_for('entities') }}">View all entities</a>
+  </body>
+</html>
+
+

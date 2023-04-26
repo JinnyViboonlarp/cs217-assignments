@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>NER Entities</title>
+  </head>
+  <body>
+    <h1>NER Entities</h1>
+    <ul>
+      {% for entity in entities %}
+        <li>{{ entity.name }} - {{ entity.frequency }}</li>
+      {% endfor %}
+    </ul>
+    <a href="{{ url_for('index') }}">Back to Home</a>
+  </body>
+</html>
