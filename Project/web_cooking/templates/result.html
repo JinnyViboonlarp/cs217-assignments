@@ -32,11 +32,13 @@
 		    {% endfor %}
 		  <button type="submit" class="btn btn-primary">Update</button>
 		</form>
+        <form method="POST" action="{{ url_for('form_submit') }}">
+            <button type="submit" class="btn btn-primary">Sumbit</button>
+        </form>
       </tbody>
     </table>
     <br>
     <a href="{{ url_for('entities') }}">View all entities</a>
   </body>
 </html>
-
 
