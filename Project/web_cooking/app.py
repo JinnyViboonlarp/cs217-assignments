@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, url_for, redirect
 from cooking_ner import NER_Document
 
 app = Flask(__name__)
@@ -26,12 +26,16 @@ create_all()
 
 @app.route('/')
 def form():
-    return render_template('form.html')    
+    return render_template('form.html')
+
+@app.route('/submit', methods=['POST'])
+def form_submit():
+    return redirect(url_for('form'))
 
 @app.route('/', methods=['POST'])
 def form_post():
     global doc
-    text = request.form['text']
+    text = request.form.get('text','')
     doc = NER_Document(text)
     entities_markup = doc.get_entities_with_markup()
     # entities is a list of 'entity', and each entity has property: start_char, end_char, label, text
