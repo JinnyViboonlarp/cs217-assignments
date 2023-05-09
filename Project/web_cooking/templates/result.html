@@ -9,36 +9,38 @@
     <p><strong>Input text:</strong> {{ text }}</p>
     <div>{{ entities_markup | safe }}</div>
     <br>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Entity</th>
-          <th>Type</th>
-          <th>Edit</th>
-        </tr>
-      </thead>
-      <tbody>
-	    <form method="POST" action="{{ url_for('update') }}">
-	      {% for entity in entities %}
-		    <tr>
-		      <td>{{ entity.text }}</td>
+    <form method="POST" action="{{ url_for('update') }}">
+      <input type="hidden" name="text" value="{{ text }}">
+      <input type="hidden" name="annotation_id" value="{{ annotation_id }}">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Entity</th>
+            <th>Type</th>
+            <th>Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entity in entities %}
+            <tr>
+              <td>{{ entity.text }}</td>
               <td>{{ entity.label }}</td>
               <td>
                 <div class="form-group">
-			      <input type="text" class="form-control" id="{{ entity.text }}" name="{{ entity.text }}" value="{{ entity.label }}">
+                  <input type="hidden" name="entity_id" value="{{ entity.id }}">
+                  <input type="text" class="form-control" id="{{ entity.text }}" name="entity_update_{{ entity.id }}" value="{{ entity.label }}">
                 </div>
-			  </td>
-		    </tr>
-		    {% endfor %}
-		  <button type="submit" class="btn btn-primary">Update</button>
-		</form>
-        <form method="POST" action="{{ url_for('form_submit') }}">
-            <button type="submit" class="btn btn-primary">Sumbit</button>
-        </form>
-      </tbody>
-    </table>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <button type="submit" class="btn btn-primary">Update</button>
+    </form>
     <br>
-    <a href="{{ url_for('entities') }}">View all entities</a>
+    <form method="POST" action="{{ url_for('form_submit') }}">
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
   </body>
 </html>
 

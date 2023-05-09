@@ -1,5 +1,3 @@
-# coding: utf-8
-
 import torch
 import sys
 import io
@@ -40,7 +38,8 @@ def text_pipeline(words):
 #==========================================================================
 
 class Entity:
-    def __init__(self, start_char, end_char, text, label):
+    def __init__(self, id, start_char, end_char, text, label):
+        self.id = id
         self.start_char = start_char
         self.end_char = end_char
         self.text = text
@@ -70,7 +69,7 @@ class NER_Document:
         showed_entities = []
         i = 0
         while(i < len(real_entities)): 
-            entity = Entity(real_entities[i].start_char, real_entities[i].end_char,
+            entity = Entity(real_entities[i].id , real_entities[i].start_char, real_entities[i].end_char,
                             real_entities[i].text, real_entities[i].label) #can't copy normally
             while((i+1)<len(real_entities) and real_entities[i+1].label ==  entity.label):
                 entity.end_char = real_entities[i+1].end_char
@@ -144,7 +143,7 @@ def create_entity_list(tokenized_text, pred):
         end_char = (start_char + len(word))
         if(not(valid(word))):
             tag = 'O'
-        entity = Entity(start_char, end_char, word, tag)
+        entity = Entity(i, start_char, end_char, word, tag)  # i is used as the unique id
         entities.append(entity)
         start_char = (end_char + 1)
         i += 1
@@ -162,5 +161,3 @@ if __name__ == "__main__":
 
     new_text, entities = ner("1/2 large sweet red onion, thinly sliced")
     print(new_text)
-    
-    
