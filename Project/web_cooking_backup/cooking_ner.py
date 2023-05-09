@@ -6,36 +6,22 @@ import io
 
 from model import LSTMTextClassifier
 from torch.utils.data import DataLoader
+import dill as pickle
 
 #========== Do the necessary loading and setting things up ================
 
 max_len = 16
 label_map = {"O": 0, "NAME": 1, "STATE": 2, "UNIT": 3, "QUANTITY": 4,
-                 "SIZE": 5, "TEMP": 6, "DF": 7}
+                 "SIZE": 5, "TEMP": 6, "DF": 7, "PADDING": 8}
 label_map_inv = {v: k for k, v in label_map.items()}
-vocab_path = 'vocab.txt'
 
 model = torch.load('model.pt')
 
-def load_vocab(vocab_path):
-    vocab = {}
-    with open(vocab_path, 'r') as fh_in:
-        lines = fh_in.readlines()
-    for line in enumerate(lines):
-        tokens = line[1].strip().split()
-        if(len(tokens) >= 2):
-            (i, word) = (tokens[0], " ".join(tokens[1:]))
-            vocab[word] = int(i)
-        else:
-            print(tokens)
-    return vocab
-
-vocab = load_vocab(vocab_path)
-out_of_vocab_index = (len(vocab)+1)
-padding_index = (len(vocab)+2)
-
-def text_pipeline(words):
-    return [vocab.get(word, out_of_vocab_index) for word in words]
+with open('vocab.p', 'rb') as file:
+    vocab = pickle.load(file)
+    
+with open('text_pipeline.p', 'rb') as file:
+    text_pipeline = pickle.load(file)
 
 #==========================================================================
 
@@ -89,17 +75,17 @@ def get_loader(tokenized_text, batch_size=32, max_len=16, shuffle=False):
 
     def collate_batch(batch):
 
-        text_list, mask_list = [], []
+        pad_token_id = -1
+        label_list, text_list, mask_list = [], [], []
         pre_augmented_text = text_pipeline(tokenized_text)
-        print(pre_augmented_text)
         for i,w in enumerate(pre_augmented_text):
             text = [w] + pre_augmented_text
             # If too short, pad to max_len.
-            text = text + ([padding_index] * max_len)
+            text = text + ([pad_token_id] * max_len)
             # If sentence too long, truncate to max_len.
             text = text[:max_len]
             # Create a mask tensor indicating where padding is present.
-            pad_mask = [0 if i==padding_index else 1 for i in text]
+            pad_mask = [0 if i==pad_token_id else 1 for i in text]
 
             text_list.append(text)
             mask_list.append(pad_mask)
@@ -123,7 +109,7 @@ def predict(model, dataloader, label_map_inv):
             # Get the predictions by taking the argmax
             int_pred = torch.argmax(output, dim=1).tolist()
             pred = pred + [label_map_inv[w] for w in int_pred]
-  
+            
     return pred
     # e.g. ['QUANTITY', 'SIZE', 'NAME', 'NAME', 'NAME', 'O', 'O', 'STATE']
 
@@ -142,7 +128,7 @@ def create_entity_list(tokenized_text, pred):
         word = tokenized_text[i]
         tag = pred[i]
         end_char = (start_char + len(word))
-        if(not(valid(word))):
+        if(tag == 'PADDING' or not(valid(word))):
             tag = 'O'
         entity = Entity(start_char, end_char, word, tag)
         entities.append(entity)
