@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, request, render_template, url_for, redirect
 from cooking_ner import NER_Document
 import pickle
+from flask import make_response
 
 app = Flask(__name__)
 
@@ -17,6 +18,7 @@ class Entity(db.Model):
     name = db.Column(db.String(50), unique=True, primary_key=True)
     frequency = db.Column(db.Integer, default=0)
 
+
 class Annotation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     input_text = db.Column(db.Text, nullable=False)
@@ -31,7 +33,6 @@ class Annotation(db.Model):
         return pickle.loads(self.ner_doc)
 
 
-
 def create_all():
     with app.app_context():
         # db.drop_all()
@@ -40,13 +41,16 @@ def create_all():
 
 create_all()
 
+
 @app.route('/')
 def form():
     return render_template('form.html')
 
+
 @app.route('/submit', methods=['POST'])
 def form_submit():
     return redirect(url_for('form'))
+
 
 @app.route('/', methods=['POST'])
 def form_post():
@@ -70,7 +74,9 @@ def form_post():
             db.session.add(db_entity)
         db.session.commit()
 
-    return render_template('result.html', entities_markup=entities_markup, text=doc.text, entities=doc.entities, annotation_id=annotation_id)
+    return render_template('result.html', entities_markup=entities_markup, text=doc.text, entities=doc.entities,
+                           annotation_id=annotation_id)
+
 
 @app.route('/update', methods=['POST'])
 def update():
@@ -95,13 +101,37 @@ def update():
         doc = annotation.get_ner_doc()
         entities_markup = doc.get_entities_with_markup()
 
-    return render_template('result.html', entities_markup=entities_markup, text=doc.text, entities=doc.entities, annotation_id=annotation_id)
+    return render_template('result.html', entities_markup=entities_markup, text=doc.text, entities=doc.entities,
+                           annotation_id=annotation_id)
+
 
 @app.route('/entities', methods=['GET', 'POST'])
 def entities():
     entities = Entity.query.all()
     annotations = Annotation.query.all()
     return render_template('entities.html', entities=entities, annotations=annotations)
+
+@app.route('/export', methods=['POST'])
+def export():
+    global doc
+    output = ""
+    for entity in doc.entities:
+        output += f"{entity.text} - {entity.label}\n"
+
+    # Generate the plain text
+    filename = 'output.txt'  # Specify the desired output file name
+    text = "NER Output:\n\n" + output
+
+    # Create a response with the generated file
+    response = make_response()
+
+    # Export as plain text
+    response.data = text
+    response.headers['Content-Disposition'] = f'attachment; filename={filename}'
+    response.headers['Content-type'] = 'text/plain'
+
+    return response
+
 
 @app.route('/edit_annotation/<int:annotation_id>', methods=['GET', 'POST'])
 def edit_annotation(annotation_id):
@@ -116,7 +146,8 @@ def edit_annotation(annotation_id):
         entities=doc.entities,
         annotation_id=annotation_id,
     )
-    
+
+
 @app.route('/delete_annotation/<int:annotation_id>', methods=['POST'])
 def delete_annotation(annotation_id):
     annotation = Annotation.query.get(annotation_id)
@@ -126,5 +157,9 @@ def delete_annotation(annotation_id):
         return redirect(url_for('entities'))
     return "Error: No annotation found for ID: {}".format(annotation_id)
 
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
+
