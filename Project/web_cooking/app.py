@@ -54,6 +54,7 @@ def form_submit():
 
 @app.route('/', methods=['POST'])
 def form_post():
+    global doc
     text = request.form.get('text', '')
     doc = NER_Document(text)
     entities_markup = doc.get_entities_with_markup()
@@ -80,6 +81,7 @@ def form_post():
 
 @app.route('/update', methods=['POST'])
 def update():
+    global doc
     annotation_id = request.form.get("annotation_id")
 
     if annotation_id:
