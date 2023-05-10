@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, request, render_template, url_for, redirect
 from cooking_ner import NER_Document
+import pickle
 
 app = Flask(__name__)
 
@@ -15,8 +16,6 @@ doc = None
 class Entity(db.Model):
     name = db.Column(db.String(50), unique=True, primary_key=True)
     frequency = db.Column(db.Integer, default=0)
-
-import pickle
 
 class Annotation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -89,15 +88,11 @@ def update():
             new_label = request.form.get(f"entity_update_{entity.id}")
             if new_label is not None:
                 entity.label = new_label
-        print(doc.entities[0].label, doc.entities[0].text)
-        print(doc.entities[1].label, doc.entities[1].text)
         annotation.set_ner_doc(doc)
         db.session.commit()
 
         # Re-fetch the updated data
         doc = annotation.get_ner_doc()
-        print(doc.entities[0].label, doc.entities[0].text)
-        print(doc.entities[1].label, doc.entities[1].text)
         entities_markup = doc.get_entities_with_markup()
 
     return render_template('result.html', entities_markup=entities_markup, text=doc.text, entities=doc.entities, annotation_id=annotation_id)
